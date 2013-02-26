@@ -38,6 +38,7 @@ import com.android.settings.Utils;
 public class Toolbar extends SettingsPreferenceFragment
         implements Preference.OnPreferenceChangeListener {
 
+    private static final String KEY_QUICK_PULL_DOWN = "quick_pulldown";
     private static final String KEY_AM_PM_STYLE = "am_pm_style";
     private static final String KEY_SHOW_CLOCK = "show_clock";
     private static final String KEY_STATUS_BAR_NOTIF_COUNT = "status_bar_notif_count";
@@ -54,6 +55,7 @@ public class Toolbar extends SettingsPreferenceFragment
     private static final String PIE_MENU = "pie_menu";
     private static final String PIE_SEARCH = "pie_search";
     private static final String PIE_CENTER = "pie_center";
+    private static final String PIE_STICK = "pie_stick";
 
     private ListPreference mAmPmStyle;
     private ListPreference mStatusBarMaxNotif;
@@ -62,6 +64,7 @@ public class Toolbar extends SettingsPreferenceFragment
     private ListPreference mPieGravity;
     private ListPreference mPieTrigger;
     private ListPreference mPieGap;
+    private CheckBoxPreference mQuickPullDown;
     private CheckBoxPreference mShowClock;
     private CheckBoxPreference mStatusBarNotifCount;
     private CheckBoxPreference mMenuButtonShow;
@@ -69,6 +72,7 @@ public class Toolbar extends SettingsPreferenceFragment
     private CheckBoxPreference mPieMenu;
     private CheckBoxPreference mPieSearch;
     private CheckBoxPreference mPieCenter;
+    private CheckBoxPreference mPieStick;
     private PreferenceScreen mNavigationBarControls;
     private PreferenceCategory mNavigationCategory;
 
@@ -82,6 +86,10 @@ public class Toolbar extends SettingsPreferenceFragment
         addPreferencesFromResource(R.xml.tool_bar_settings);
         PreferenceScreen prefSet = getPreferenceScreen();
         mContext = getActivity();
+
+        mQuickPullDown = (CheckBoxPreference) prefSet.findPreference(KEY_QUICK_PULL_DOWN);
+        mQuickPullDown.setChecked(Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.QS_QUICK_PULLDOWN, 0) == 1);
 
         mShowClock = (CheckBoxPreference) prefSet.findPreference(KEY_SHOW_CLOCK);
         mShowClock.setChecked(Settings.System.getInt(mContext.getContentResolver(),
@@ -98,6 +106,10 @@ public class Toolbar extends SettingsPreferenceFragment
         mPieCenter = (CheckBoxPreference) prefSet.findPreference(PIE_CENTER);
         mPieCenter.setChecked(Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.PIE_CENTER, 1) == 1);
+
+        mPieStick = (CheckBoxPreference) prefSet.findPreference(PIE_STICK);
+        mPieStick.setChecked(Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.PIE_STICK, 0) == 1);
 
         mAmPmStyle = (ListPreference) prefSet.findPreference(KEY_AM_PM_STYLE);
         int amPmStyle = Settings.System.getInt(mContext.getContentResolver(),
@@ -142,7 +154,7 @@ public class Toolbar extends SettingsPreferenceFragment
             float pieTrigger = Settings.System.getFloat(mContext.getContentResolver(),
                     Settings.System.PIE_TRIGGER);
             mPieTrigger.setValue(String.valueOf(pieTrigger));
-        } catch(Settings.SettingNotFoundException ex) {
+        } catch(SettingNotFoundException ex) {
             // So what
         }
 
@@ -183,6 +195,7 @@ public class Toolbar extends SettingsPreferenceFragment
             }
         } else {
             mNavigationCategory.removePreference(mNavigationBarControls);
+            prefSet.removePreference(mQuickPullDown);
         }
     }
 
@@ -192,11 +205,15 @@ public class Toolbar extends SettingsPreferenceFragment
             Settings.System.putInt(mContext.getContentResolver(),
                     Settings.System.STATUS_BAR_SHOW_CLOCK, mShowClock.isChecked()
                     ? 1 : 0);
+        } else if (preference == mQuickPullDown) {	
+            Settings.System.putInt(mContext.getContentResolver(),
+                    Settings.System.QS_QUICK_PULLDOWN,	mQuickPullDown.isChecked()
+                    ? 1 : 0);	
         } else if (preference == mStatusBarNotifCount) {	
             Settings.System.putInt(mContext.getContentResolver(),
                     Settings.System.STATUS_BAR_NOTIF_COUNT,	mStatusBarNotifCount.isChecked()
                     ? 1 : 0);	
-        }else if (preference == mMenuButtonShow) {
+        } else if (preference == mMenuButtonShow) {
             Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
                     Settings.System.NAV_BAR_TABUI_MENU, mMenuButtonShow.isChecked() ? 1 : 0);
             return true;
@@ -209,11 +226,14 @@ public class Toolbar extends SettingsPreferenceFragment
             Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
                     Settings.System.PIE_MENU, mPieMenu.isChecked() ? 1 : 0);
         } else if (preference == mPieSearch) {
-            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),  
                     Settings.System.PIE_SEARCH, mPieSearch.isChecked() ? 1 : 0);
         } else if (preference == mPieCenter) {
             Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
                     Settings.System.PIE_CENTER, mPieCenter.isChecked() ? 1 : 0);
+        } else if (preference == mPieStick) {
+            Settings.System.putInt(getActivity().getApplicationContext().getContentResolver(),
+                    Settings.System.PIE_STICK, mPieStick.isChecked() ? 1 : 0);
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
