@@ -312,8 +312,13 @@ public class StorageVolumePreferenceCategory extends PreferenceCategory {
         long total = 0;
         for (String key : keys) {
             if (map.containsKey(key)) {
+<<<<<<< HEAD
             total += map.get(key);
            }
+=======
+                total += map.get(key);
+            }
+>>>>>>> upstream/jellybean-legacy
         }
         return total;
     }
